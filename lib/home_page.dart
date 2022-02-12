@@ -11,13 +11,26 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int? currentSelectedRadio;
   var assetsRadioGroup = {
-    0: "assets/paypal_logo.png",
-    1: "assets/creditcard_logo.png",
+    0: "assets/paypal.png",
+    1: "assets/credit_card.png",
   };
   var radioGroup = {
     0: "Paypal",
     1: "Tarjeta",
   };
+
+  double totalCredit = 0.0;
+  double totalPaypal = 0.0;
+  double percent = 0.0;
+  String selectedDonation = '100';
+
+  var donateOptions = [
+    '100',
+    '350',
+    '850',
+    '1000',
+    '9999',
+  ];
 
   radioGroupGenerator() {
     return radioGroup.entries
@@ -42,39 +55,42 @@ class _HomePageState extends State<HomePage> {
         .toList();
   }
 
-  // TODO: completar metodo para generar los DropDownMenuItems
-  // Es posible utilizar .map como en la de los radios
-  dropDownItemsGenerator() {
-    return [];
+  DropdownMenuItem<String> dropDownItemsGenerator(String items) {
+    return DropdownMenuItem(
+      value: items,
+      child: Text(items),
+    );
   }
 
-  // TODO: metodo para calcular las donaciones
-  // identifica si la donacion es por paypal o tarjeta
-  // utiliza datos de los radio buttons y drop down
-  void calcularDonaciones() {}
+  void calcularDonaciones() {
+    totalPaypal +=
+        currentSelectedRadio == 0 ? double.parse(selectedDonation) : 0.0;
+    totalCredit +=
+        currentSelectedRadio == 1 ? double.parse(selectedDonation) : 0.0;
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Donaciones'),
+        title: const Text('Donaciones'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: ListView(
           children: [
-            Text(
+            const Text(
               "Es para una buena causa",
               style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
             ),
-            Text(
+            const Text(
               "Elija modo de donativo",
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w300),
             ),
-            // Radios paypal y tarjeta
             Container(
-              padding: EdgeInsets.all(20),
-              margin: EdgeInsets.all(20),
+              padding: const EdgeInsets.all(20),
+              margin: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 border: Border.all(width: 1),
                 borderRadius: BorderRadius.circular(15),
@@ -84,29 +100,76 @@ class _HomePageState extends State<HomePage> {
                 children: radioGroupGenerator(),
               ),
             ),
-            // TODO: Agregar DropdownButton en el trailing
-            // utilizar el metodo dropDownItemsGenerator() para pasar
-            // como parametro a "items" del DropdownButton
             ListTile(
-              title: Text("Cantidad a donar:"),
+              title: const Text("Cantidad a donar:"),
+              trailing: Column(
+                children: [
+                  DropdownButton(
+                    value: selectedDonation,
+                    icon: const Icon(Icons.keyboard_arrow_down),
+                    items: donateOptions.map(dropDownItemsGenerator).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        selectedDonation = newValue!;
+                      });
+                    },
+                  ),
+                ],
+              ),
             ),
-            // TODO: Agregar LinearProgressIndicator con altura de 20
-            // TODO: Agregar Text con el % de donacion y max 2 decimales
-            // TODO: Agregar Boton de DONAR y logica necesaria
+            const SizedBox(
+              height: 30,
+            ),
+            Column(
+              children: [
+                Stack(
+                  children: [
+                    LinearProgressIndicator(
+                      minHeight: 25,
+                      backgroundColor: Colors.purpleAccent,
+                      value: (totalPaypal + totalCredit) / 10000 > 1.0
+                          ? 1.0
+                          : (totalPaypal + totalCredit) / 10000,
+                      valueColor:
+                          const AlwaysStoppedAnimation<Color>(Colors.purple),
+                    ),
+                    Align(
+                      child: Text(
+                        ((totalCredit + totalPaypal) / 100).toString() + "%",
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20),
+                      ),
+                      alignment: Alignment.topCenter,
+                    )
+                  ],
+                ),
+                const SizedBox(height: 50),
+                ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(1500, 35)),
+                    onPressed: calcularDonaciones,
+                    child: const Text("Donar")),
+              ],
+            )
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.remove_red_eye),
-        tooltip: "Ver donativos",
+        child: const Icon(Icons.remove_red_eye),
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => Donativos(
-                donativos: {},
+                donativos: {
+                  "paypal": totalPaypal,
+                  "credit": totalCredit,
+                },
               ),
             ),
           );
+          setState(() {});
         },
       ),
     );

@@ -20,7 +20,7 @@ class _DonativosState extends State<Donativos> {
         child: Column(
           children: [
             ListTile(
-              leading: Image.asset("assets/paypal_logo.png"),
+              leading: Image.asset("assets/paypal.png"),
               trailing: Text(
                 "${widget.donativos["paypal"] ?? 0.0}",
                 style: TextStyle(fontSize: 32),
@@ -28,9 +28,9 @@ class _DonativosState extends State<Donativos> {
             ),
             SizedBox(height: 24),
             ListTile(
-              leading: Image.asset("assets/creditcard_logo.png"),
+              leading: Image.asset("assets/credit_card.png"),
               trailing: Text(
-                "${widget.donativos["tarjeta"] ?? 0.0}",
+                "${widget.donativos["credit"] ?? 0.0}",
                 style: TextStyle(fontSize: 32),
               ),
             ),
@@ -39,11 +39,13 @@ class _DonativosState extends State<Donativos> {
             ListTile(
               leading: Icon(Icons.attach_money, size: 64),
               trailing: Text(
-                "${widget.donativos["acumulado"] ?? 0.0}",
+                "${widget.donativos["paypal"] + widget.donativos["credit"] ?? 0.0}",
                 style: TextStyle(fontSize: 32),
               ),
             ),
-            // TODO: mostrar imagen de "Gracias" solo si se ha logrado la meta de 10,000 en donaciones
+            widget.donativos["paypal"] + widget.donativos["credit"] > 10000
+                ? Image.asset("assets/gracias.png")
+                : Center()
           ],
         ),
       ),
